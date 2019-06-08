@@ -1,12 +1,13 @@
 package ru.job4j.gsmirnov.models;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 /**
  * User's model description.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 1.0
+ * @version 1.1
  * @since 06/06/2019
  */
 public class User {
@@ -82,5 +83,35 @@ public class User {
      */
     public void setExpired(Timestamp expired) {
         this.expired = expired;
+    }
+
+    /**
+     * Compares this user with another user.
+     *
+     * @param o - another user.
+     * @return true, if these users are equals, false either.
+     */
+    @Override
+    public boolean equals(Object o) {
+        boolean result;
+        if (this == o) {
+            result = true;
+        } else if (o == null || getClass() != o.getClass()) {
+            result = false;
+        } else {
+            User user = (User) o;
+            result = Objects.equals(this.name, user.name);
+        }
+        return result;
+    }
+
+    /**
+     * Calculates hash-code for this user.
+     *
+     * @return hash-code for this user.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
     }
 }
