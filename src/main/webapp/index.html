@@ -1,0 +1,199 @@
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    /**
+     * F5 - reloads page and current table.
+     */
+    $(
+        $.ajax("./listAll", {
+            method : "get",
+            complete : function(response) {
+                console.log(JSON.parse(response.responseText));
+                var result =
+                    "<thead class=\"thead-dark\">" +
+                    "<tr>" +
+                    "<th>Название задачи</th>" +
+                    "<th>Описание</th>" +
+                    "<th>Дата начала</th>" +
+                    "<th>Выполнено</th>" +
+                    "</tr>" +
+                    "</thead>" +
+                    "<tbody>";
+                var tasks = JSON.parse(response.responseText);
+                for (var index = 0; index < tasks.length; index++) {
+                    result += "<tr>" +
+                        "<td>" + tasks[index].name + "</td>" +
+                        "<td>" + tasks[index].desc + "</td>" +
+                        "<td>" + tasks[index].created + "</td>" +
+                        "<td>";
+                    if (tasks[index].done === true) {
+                        result += "+";
+                    } else {
+                        result += "-";
+                    }
+                    result += "</td></tr>";
+                }
+                result += "</tbody>";
+                var table = document.getElementById("tasks");
+                table.innerHTML = result;
+            }
+        })
+    );
+
+    /**
+     * Change buttons states. Depends on are the input fields for 'task' and 'description' empty or filled.
+     */
+    function changeButtonsState() {
+        if ($('#name').val() !== '' || $('#description').val() !== '' ) {
+            $('#save').removeAttr('disabled');
+            $('#cancel').removeAttr('disabled');
+        } else {
+            $('#save').attr('disabled', 'disable');
+            $('#cancel').attr('disabled', 'disable')
+        }
+    }
+
+    /**
+     * Save button listener.
+     */
+    $( document ).ready(function() {
+        $("#save").click(
+            function() {
+                console.log('Save button clicked');
+                sendAjaxForm('./addTask');
+                resetForm();
+                return false;
+            }
+        );
+    });
+
+    /**
+     * Sending form with a new task to the server. And updates table by appending new user.
+     */
+    function sendAjaxForm(url) {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                name : $('#name').val(),
+                description : $('#description').val()
+            },
+            success: function(response) {
+                console.log(response);
+
+                let result = '<tr>' +
+                    '<td>' + response.name + '</td>' +
+                    '<td>' + response.desc + '</td>' +
+                    '<td>' + response.created + '</td>' +
+                    '<td>';
+                if (response.done === true) {
+                    result += '+';
+                } else {
+                    result += '-';
+                }
+                result += '</td></tr>';
+                let tbody = document.getElementsByTagName("tbody")[0];
+                tbody.innerHTML += result;
+                console.log(result);
+            },
+            error: function(response) {
+                console.log('Error. Data not sent.');
+            }
+        });
+    }
+
+    /**
+     * Clears inputs and resets buttons states.
+     */
+    function resetForm() {
+        document.getElementById('name').value = "";
+        document.getElementById('description').value = "";
+        this.changeButtonsState();
+    }
+
+    /**
+     * Checkbox handler. Hides done tasks if checked, shows all either.
+     *
+     * @returns {boolean}
+     */
+    function toggleTasks(){
+        var target = 'table';
+        if(!$('#doneTasks').prop('checked')) {
+            $(target).find('tr').show();
+        } else {
+            $(target).find('tr').each(function () {
+                var done = false;
+                $(this).find('td').each(function () {
+                    if ($(this).text() === "+") {
+                        console.log('Done task found');
+                        done = true;
+                    }
+                });
+                if (done === true) {
+                    $(this).hide();
+                }
+            })
+        }
+    }
+</script>
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Tasks planer</title>
+</head>
+<body>
+
+<div class="container">
+    <h2>Планировщик задач</h2>
+    <br/>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-3 col-xl-3"></div>
+        <div class="col-md-6 col-lg-3 col-xl-3"></div>
+        <div class="col-md-6 col-lg-3 col-xl-3">
+            <p>Не показывать завершенные задачи</p>
+            <input type="checkbox" id="doneTasks" onchange="toggleTasks()">
+        </div>
+        <div class="col-md-6 col-lg-3 col-xl-3">
+            <form id="newTask">
+                <div class="mb-3 input-group-sm">
+                    <p>Создать новую задачу</p>
+                </div>
+                <div class="mb-3 input-group-sm">
+                    <input type="text" class="form-control" placeholder="Задача" id="name" onkeyup="changeButtonsState()">
+                </div>
+                <div class="mb-3 input-group-sm">
+                    <input type="text" class="form-control" placeholder="Описание" id="description" onkeyup="changeButtonsState()">
+                </div>
+
+                <div class="row">
+                    <div class="col-6" align="center">
+                        <button type="button" id="save" disabled class="btn btn-outline-success length-9">Сохранить</button>
+                    </div>
+                    <div class="col-6" align="center">
+                        <button type="button" id="cancel" disabled class="btn btn-outline-primary length-9" onclick="resetForm();">Отмена</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <br/>
+    <br/>
+
+    <table class="table" id="tasks"></table>
+</div>
+
+</body>
+</html>

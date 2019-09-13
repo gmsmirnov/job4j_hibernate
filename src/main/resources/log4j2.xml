@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Configuration status="info">
+<Configuration status="WARN">
 
     <Properties>
         <Property name="log_dir">D:\Work\Java\projects\job4j_hibernate\log\</Property>
@@ -17,13 +17,21 @@
             </Policies>
             <DefaultRolloverStrategy max="10" />
         </RollingFile>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${layout}"/>
+        </Console>
     </Appenders>
 
     <Loggers>
-        <Logger name="ru.job4j.gsmirnov"
-                level="info" additivity="false">
+        <Logger name="ru.job4j.gsmirnov" level="info" additivity="false">
             <AppenderRef ref="JOB4J_HIBERNATE"/>
         </Logger>
-        <Root level="error"/>
+        <Logger name="ru.job4j.gsmirnov" level="info" additivity="true">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="all">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="JOB4J_HIBERNATE"/>
+        </Root>
     </Loggers>
 </Configuration>

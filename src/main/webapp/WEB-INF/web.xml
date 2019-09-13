@@ -5,13 +5,35 @@
                       http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
     <!--Controllers-->
- <!--   <servlet>
-        <servlet-name>hallController</servlet-name>
-        <servlet-class>ru.job4j.cinema.controller.HallController</servlet-class>
+    <servlet>
+        <servlet-name>tasksController</servlet-name>
+        <servlet-class>ru.job4j.gsmirnov.controllers.TasksController</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>hallController</servlet-name>
-        <url-pattern>/hall</url-pattern>
-    </servlet-mapping>-->
+        <servlet-name>tasksController</servlet-name>
+        <url-pattern>/tasks</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>tasksListController</servlet-name>
+        <servlet-class>ru.job4j.gsmirnov.controllers.TasksListController</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>tasksListController</servlet-name>
+        <url-pattern>/listAll</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>addTaskController</servlet-name>
+        <servlet-class>ru.job4j.gsmirnov.controllers.AddTaskController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>addTaskController</servlet-name>
+        <url-pattern>/addTask</url-pattern>
+    </servlet-mapping>
+
+    <!--Listeners-->
+    <listener>
+        <listener-class>ru.job4j.gsmirnov.listeners.AppDestructionListener</listener-class>
+    </listener>
 </web-app>

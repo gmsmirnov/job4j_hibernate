@@ -1,25 +1,20 @@
 package ru.job4j.gsmirnov.models;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 /**
  * User's model description.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 1.1
+ * @version 0.2
  * @since 06/06/2019
  */
-public class User {
+public class User extends BaseEntity {
     /**
-     * One tear in milliseconds. Expired date (for account) is current time + one year.
+     * One year in milliseconds. Expired date (for account) is current time + one year.
      */
     public static final long YEAR = 1000L * 60 * 60 * 24 * 365;
-
-    /**
-     * User's id - unique.
-     */
-    private int id;
 
     /**
      * User's name.
@@ -29,24 +24,27 @@ public class User {
     /**
      * Expired date - one year from creation or modification.
      */
-    private Timestamp expired;
+    private Date expired;
 
     /**
-     * Gets the user's id.
-     *
-     * @return the user's id.
+     * The default constructor.
      */
-    public int getId() {
-        return this.id;
+    public User() {
+        super();
+        this.name = "";
+        this.expired = new Date(System.currentTimeMillis() + User.YEAR);
     }
 
     /**
-     * Sets the user's id.
+     * The constructor with params.
      *
-     * @param id - the specified id for this user.
+     * @param id   the specified id.
+     * @param name the specified name.
      */
-    public void setId(int id) {
-        this.id = id;
+    public User(int id, String name) {
+        super(id);
+        this.name = name;
+        this.expired = new Date(System.currentTimeMillis() + User.YEAR);
     }
 
     /**
@@ -72,7 +70,7 @@ public class User {
      *
      * @return the expired date.
      */
-    public Timestamp getExpired() {
+    public Date getExpired() {
         return this.expired;
     }
 
@@ -81,7 +79,7 @@ public class User {
      *
      * @param expired - new expired date for this user.
      */
-    public void setExpired(Timestamp expired) {
+    public void setExpired(Date expired) {
         this.expired = expired;
     }
 
@@ -113,5 +111,15 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(this.name);
+    }
+
+    /**
+     * The string presentation of this user.
+     *
+     * @return the string presentation of this user.
+     */
+    @Override
+    public String toString() {
+        return String.format("User{id = %d, name=%s, expired=%s}", this.getId(), this.name, this.expired);
     }
 }

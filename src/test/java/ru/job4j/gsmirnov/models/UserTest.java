@@ -40,4 +40,18 @@ public class UserTest {
         user2.setExpired(new Timestamp(System.currentTimeMillis() + User.YEAR));
         assertThat(user1.equals(user2), is(false));
     }
+
+    @Test
+    public void whenTwoBaseEntityUsersAreNotEqualsThenFalse() {
+        BaseEntity user1 = new User();
+        BaseEntity user2 = new User(1, "admin");
+        assertThat(user1.equals(user2), is(false));
+    }
+
+    @Test
+    public void whenTwoBaseEntityUsersAreEqualsThenTrue() {
+        BaseEntity user1 = new User();
+        BaseEntity user2 = new User();
+        assertThat(user1.equals(user2), is(true));
+    }
 }
