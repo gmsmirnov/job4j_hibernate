@@ -2,18 +2,16 @@ package ru.job4j.gsmirnov.repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import ru.job4j.gsmirnov.models.Task;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * The class which provides access to CRUD operations with Task-model through Hibernate API.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 0.1
+ * @version 0.2
  * @since 08/09/2019
  */
 public class TaskDAO {
@@ -28,18 +26,12 @@ public class TaskDAO {
      * @param task a new task
      */
     public Task addTask(Task task) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(task);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return task;
+        return Command.tx(
+                session -> {
+                    session.save(task);
+                    return task;
+                }
+        );
     }
 
     /**
@@ -49,25 +41,11 @@ public class TaskDAO {
      * @return the task mapped to the specified id.
      */
     public Task findTask(int id) {
-        Transaction transaction = null;
-        Task result = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Task> tasks = session.createQuery("from Task").list();
-            for (Task task : tasks) {
-                if (task.getId() == id) {
-                    result = task;
-                    break;
+        return Command.tx(
+                session -> {
+                    return session.get(Task.class, id);
                 }
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        );
     }
 
     /**
@@ -76,25 +54,14 @@ public class TaskDAO {
      * @param name the specified task's name.
      * @return the list of tasks with the specified name.
      */
-    public List<Task> findTask(String name) {
-        Transaction transaction = null;
-        List<Task> result = new LinkedList<Task>();
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Task> tasks = session.createQuery("from Task").list();
-            for (Task task : tasks) {
-                if (task.getName().equals(name)) {
-                    result.add(task);
+    public List<Task> findTasks(String name) {
+        return Command.tx(
+                session -> {
+                    final Query<Task> query = session.createQuery("from Task as task where task.name =: name", Task.class);
+                    query.setParameter("name", name);
+                    return query.list();
                 }
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        );
     }
 
     /**
@@ -104,18 +71,12 @@ public class TaskDAO {
      * @param task the new specified task's params.
      */
     public void updateTask(int id, Task task) {
-        Transaction transaction = null;
         task.setId(id);
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.update(task);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    session.update(task);
+                }
+        );
     }
 
     /**
@@ -124,19 +85,13 @@ public class TaskDAO {
      * @param id the specified task's id.
      */
     public void deleteTask(int id) {
-        Transaction transaction = null;
-        Task task = new Task();
-        task.setId(id);
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.delete(task);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    Task task = new Task();
+                    task.setId(id);
+                    session.delete(task);
+                }
+        );
     }
 
     /**
@@ -145,64 +100,21 @@ public class TaskDAO {
      * @return the list of all tasks.
      */
     public List<Task> findAllTasks() {
-        Transaction transaction = null;
-        List<Task> tasks = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            LOG.info("Начало транзакции");
-            tasks = session.createQuery("from Task").list();
-            LOG.info("Получили список " + tasks);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return tasks;
+        return Command.tx(
+                session -> {
+                    return session.createQuery("from Task", Task.class).list();
+                }
+        );
     }
 
     /**
      * Deletes all tasks from DB.
      */
     public void deleteAllTasks() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.createSQLQuery("delete from tasks").executeUpdate();
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Finds the list of tasks with the specified name.
-     *
-     * @param name the specified tasks name.
-     * @return the list of tasks with the specified name.
-     */
-    public List<Task> findTasks(String name) {
-        Transaction transaction = null;
-        List<Task> result = new LinkedList<Task>();
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Task> tasks = session.createQuery("from Task").list();
-            for (Task task : tasks) {
-                if (task.getName().equals(name)) {
-                    result.add(task);
+        Command.tx(
+                session -> {
+                    session.createSQLQuery("delete from tasks").executeUpdate();
                 }
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        );
     }
 }

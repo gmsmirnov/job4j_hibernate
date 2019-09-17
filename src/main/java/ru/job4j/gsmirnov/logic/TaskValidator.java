@@ -14,7 +14,7 @@ import java.util.List;
  * Tasks validator. Checks params and returned values.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 0.1
+ * @version 0.2
  * @since 09/09/2019
  */
 public class TaskValidator implements BaseValidator {
@@ -31,7 +31,7 @@ public class TaskValidator implements BaseValidator {
     /**
      * The data access object for task model.
      */
-    private TaskDAO taskDAO;
+    private final TaskDAO taskDAO;
 
     /**
      * The default constructor.

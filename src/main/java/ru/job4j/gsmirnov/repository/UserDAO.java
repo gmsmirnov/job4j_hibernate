@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import ru.job4j.gsmirnov.models.User;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * The class which provides access to CRUD operations with User-model through Hibernate API.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 0.2
+ * @version 0.3
  * @since 06/06/2019
  */
 public class UserDAO {
@@ -27,18 +28,12 @@ public class UserDAO {
      * @param user a new user to addition into DB.
      */
     public User addUser(User user) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(user);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return user;
+        return Command.tx(
+                session -> {
+                    session.save(user);
+                    return user;
+                }
+        );
     }
 
     /**
@@ -48,25 +43,11 @@ public class UserDAO {
      * @return the user mapped to the specified id.
      */
     public User findUser(int id) {
-        Transaction transaction = null;
-        User result = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<User> users = session.createQuery("from User").list();
-            for (User user : users) {
-                if (user.getId() == id) {
-                    result = user;
-                    break;
+        return Command.tx(
+                session -> {
+                    return session.get(User.class, id);
                 }
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        );
     }
 
     /**
@@ -76,25 +57,13 @@ public class UserDAO {
      * @return the user with the specified name.
      */
     public User findUser(String name) {
-        Transaction transaction = null;
-        User result = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<User> users = session.createQuery("from User").list();
-            for (User user : users) {
-                if (user.getName().equals(name)) {
-                    result = user;
-                    break;
+        return Command.tx(
+                session -> {
+                    Query<User> query = session.createQuery("from User as user where user.name =: name", User.class);
+                    query.setParameter("name", name);
+                    return query.list().get(0); // name is unique
                 }
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        );
     }
 
     /**
@@ -105,17 +74,11 @@ public class UserDAO {
      */
     public void updateUser(int id, User user) {
         user.setId(id);
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.update(user);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    session.update(user);
+                }
+        );
     }
 
     /**
@@ -124,19 +87,13 @@ public class UserDAO {
      * @param id the specified user's id.
      */
     public void deleteUser(int id) {
-        Transaction transaction = null;
         User user = new User();
         user.setId(id);
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.delete(user);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    session.delete(user);
+                }
+        );
     }
 
     /**
@@ -145,35 +102,21 @@ public class UserDAO {
      * @return the list of all users.
      */
     public List<User> findAllUsers() {
-        Transaction transaction = null;
-        List<User> result = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            result = session.createQuery("from User").list();
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
+        return Command.tx(
+                session -> {
+                    return session.createQuery("from User", User.class).list();
+                }
+        );
     }
 
     /**
      * Deletes all users from DB.
      */
     public void deleteAllUsers() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.createSQLQuery("delete from users").executeUpdate();
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    session.createSQLQuery("delete from users").executeUpdate();
+                }
+        );
     }
 }

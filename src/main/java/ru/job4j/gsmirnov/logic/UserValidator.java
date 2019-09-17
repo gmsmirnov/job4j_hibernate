@@ -14,7 +14,7 @@ import java.util.List;
  * The user validator. Check params and returned values.
  *
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 0.1
+ * @version 0.2
  * @since 09/09/2019
  */
 public class UserValidator implements BaseValidator {
@@ -31,7 +31,7 @@ public class UserValidator implements BaseValidator {
     /**
      * The data access object for user model.
      */
-    private UserDAO userDAO;
+    private final UserDAO userDAO;
 
     /**
      * The default constructor.
