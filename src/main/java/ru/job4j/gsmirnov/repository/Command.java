@@ -10,12 +10,22 @@ import java.util.function.Function;
 
 /**
  * @author Gregory Smirnov (artress@ngs.ru)
- * @version 0.1
+ * @version 0.2
  * @since 14/09/2019
  */
 public class Command {
+    /**
+     * The logger.
+     */
     private final static Logger LOG = LogManager.getLogger(Command.class);
 
+    /**
+     * A wrapper over a command which returns a value.
+     *
+     * @param command the command which need to execute.
+     * @param <T> the type of result.
+     * @return the result of the specified command.
+     */
     public static <T> T tx(final Function<Session, T> command) {
         Transaction transaction = null;
         T result = null;
@@ -32,17 +42,17 @@ public class Command {
         return result;
     }
 
+    /**
+     * A wrapper over a command.
+     *
+     * @param command the specified command to execute.
+     */
     public static void tx(final Consumer<Session> command) {
-        Transaction transaction = null;
-        try (final Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            command.accept(session);
-            transaction.commit();
-        } catch (final Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            LOG.error(e.getMessage(), e);
-        }
+        Command.tx(
+                session -> {
+                    command.accept(session);
+                    return null;
+                }
+        );
     }
 }
