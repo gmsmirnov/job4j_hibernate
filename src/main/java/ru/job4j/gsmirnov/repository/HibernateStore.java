@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -13,29 +14,32 @@ import java.util.function.Function;
  * @version 0.2
  * @since 14/09/2019
  */
-public class Command {
+public abstract class HibernateStore<E> implements Store<E> {
     /**
      * The logger.
      */
-    private final static Logger LOG = LogManager.getLogger(Command.class);
+    private final static Logger LOG = LogManager.getLogger(HibernateStore.class);
 
     /**
      * A wrapper over a command which returns a value.
      *
      * @param command the command which need to execute.
-     * @param <T> the type of result.
      * @return the result of the specified command.
      */
-    public static <T> T tx(final Function<Session, T> command) {
+    protected <R> Optional<R> tx(final Function<Session, R> command) {
         Transaction transaction = null;
-        T result = null;
+        Optional<R> result = Optional.empty();
         try (final Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            result = command.apply(session);
+            result = Optional.ofNullable(command.apply(session));
             transaction.commit();
         } catch (final Exception e) {
             if (transaction != null) {
-                transaction.rollback();
+                try {
+                    transaction.rollback();
+                } catch (final Exception er) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
             LOG.error(e.getMessage(), e);
         }
@@ -47,11 +51,11 @@ public class Command {
      *
      * @param command the specified command to execute.
      */
-    public static void tx(final Consumer<Session> command) {
-        Command.tx(
+    protected void tx(final Consumer<Session> command) {
+        this.tx(
                 session -> {
                     command.accept(session);
-                    return null;
+                    return Optional.empty();
                 }
         );
     }

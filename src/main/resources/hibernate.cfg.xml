@@ -6,9 +6,18 @@
         <property name="connection.username">postgres</property>
         <property name="connection.password">postgres</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQL10Dialect</property>
-        <property name="show_sql">true</property>
 
-        <mapping resource="ru/job4j/gsmirnov/models/User.hbm.xml"/>
-        <mapping resource="ru/job4j/gsmirnov/models/Task.hbm.xml"/>
+        <!--Drops and re-creates DB tables on startup-->
+        <property name="hibernate.hbm2ddl.auto">create</property>
+
+        <!--<property name="hibernate.show_sql">true</property>-->
+        <property name="hibernate.format_sql">true</property>
+        <!--<property name="hibernate.enable_lazy_load_no_trans">true</property>-->
+        <property name="hibernate.connection.characterEncoding">utf8</property>
+
+        <mapping resource="ru/job4j/gsmirnov/models/Body.hbm.xml"/>
+        <mapping resource="ru/job4j/gsmirnov/models/Engine.hbm.xml"/>
+        <mapping resource="ru/job4j/gsmirnov/models/Transmission.hbm.xml"/>
+        <mapping resource="ru/job4j/gsmirnov/models/Car.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

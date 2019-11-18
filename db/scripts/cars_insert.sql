@@ -25,8 +25,8 @@ insert into transmission(name, serial_number) values('МКПП-2', 'M222222');
 insert into transmission(name, serial_number) values('МКПП-3', 'M333333');
 insert into transmission(name, serial_number) values('МКПП-4', 'M444444');
 
-insert into car(name, body, engine, transmission) values('car-1', '1', '2', '3');
-insert into car(name, body, engine, transmission) values('car-2', '2', '3', '4');
-insert into car(name, body, engine, transmission) values('car-3', '4', '5', '6');
-insert into car(name, body, engine, transmission) values('car-4', '1', '5', '6');
-insert into car(name, body, engine, transmission) values('car-5', '2', '2', '3');
+insert into car(name, body_id, engine_id, transmission_id) values('car-1', '1', '2', '3');
+insert into car(name, body_id, engine_id, transmission_id) values('car-2', '2', '3', '4');
+insert into car(name, body_id, engine_id, transmission_id) values('car-3', '4', '5', '6');
+insert into car(name, body_id, engine_id, transmission_id) values('car-4', '1', '5', '6');
+insert into car(name, body_id, engine_id, transmission_id) values('car-5', '2', '2', '3');

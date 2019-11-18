@@ -7,7 +7,7 @@
     </Properties>
 
     <Appenders>
-        <RollingFile name="JOB4J_HIBERNATE"
+        <RollingFile name="File"
                      fileName="${log_dir}\job4j_hibernate.log"
                      filePattern="${log_dir}\job4j_hibernate.%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="${layout}"/>
@@ -23,15 +23,34 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="ru.job4j.gsmirnov" level="info" additivity="false">
-            <AppenderRef ref="JOB4J_HIBERNATE"/>
+        <!-- Log everything in hibernate -->
+        <Logger name="org.hibernate" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
         </Logger>
+
+        <!-- Log SQL statements -->
+        <Logger name="org.hibernate.SQL" level="debug" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Logger>
+
+        <!-- Log JDBC bind parameters -->
+        <Logger name="org.hibernate.type.descriptor.sql" level="all" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Logger>
+
+        <Logger name="ru.job4j.gsmirnov" level="info" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
+
         <Logger name="ru.job4j.gsmirnov" level="info" additivity="true">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="all">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="JOB4J_HIBERNATE"/>
+            <!--<AppenderRef ref="Console"/>-->
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>
