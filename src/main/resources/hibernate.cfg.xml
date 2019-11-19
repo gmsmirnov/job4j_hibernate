@@ -15,9 +15,9 @@
         <!--<property name="hibernate.enable_lazy_load_no_trans">true</property>-->
         <property name="hibernate.connection.characterEncoding">utf8</property>
 
-        <mapping resource="ru/job4j/gsmirnov/models/Body.hbm.xml"/>
-        <mapping resource="ru/job4j/gsmirnov/models/Engine.hbm.xml"/>
-        <mapping resource="ru/job4j/gsmirnov/models/Transmission.hbm.xml"/>
-        <mapping resource="ru/job4j/gsmirnov/models/Car.hbm.xml"/>
+        <mapping class="ru.job4j.gsmirnov.models.Body"/>
+        <mapping class="ru.job4j.gsmirnov.models.Engine"/>
+        <mapping class="ru.job4j.gsmirnov.models.Transmission"/>
+        <mapping class="ru.job4j.gsmirnov.models.Car"/>
     </session-factory>
 </hibernate-configuration>
